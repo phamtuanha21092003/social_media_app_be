@@ -1,0 +1,17 @@
+# asgiref==3.6.0
+# Pillow==9.5.0
+# PyJWT==2.6.0
+# pytz==2023.3
+# sqlparse==0.4.3
+psycopg2-binary==2.9.9
+flask==3.3.0
+sqlalchemy==2.0.30
+Flask-SQLAlchemy==3.1.1
+python-dotenv==1.0.1
+alembic==1.13.1
+Flask-Bcrypt==1.0.1
+Flask-JWT-Extended==4.6.0
+marshmallow==3.21.3
+flask_cors==4.0.1
+flask_restful==0.3.10
+ratelimit==2.2.1
