@@ -2,6 +2,8 @@ from flask import Blueprint
 from flask_restful import Api
 from .login import Login
 from .sign_up import SignUp
+from .refresh import Refresh
+
 
 auth_blueprint = Blueprint("auth_blueprint", __name__, url_prefix="/auth")
 auth_api = Api(auth_blueprint)
@@ -10,6 +12,7 @@ auth_api = Api(auth_blueprint)
 auth_routers = {
     "/login": Login,
     "/sign_up": SignUp,
+    "/refresh": Refresh
 }
 
 

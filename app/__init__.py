@@ -50,7 +50,7 @@ def __init_extensions(app: Flask):
     @jwt.user_lookup_loader
     def user_lookup_callback(_jwt_header, jwt_data):
         identity = jwt_data["sub"]
-        return db.session.execute(select(AccountUser)).filter_by(id=identity).scalar_one()
+        return db.session.execute(select(AccountUser).filter_by(id=identity)).scalar_one()
 
 
 def __config_blueprints(app: Flask):
