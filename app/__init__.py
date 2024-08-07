@@ -18,7 +18,6 @@ from ratelimit import RateLimitException
 from marshmallow import ValidationError
 
 
-
 jwt = JWTManager()
 
 
@@ -93,7 +92,7 @@ def _config_error_handlers(app: Flask):
 
     @app.errorhandler(UPermissionDenied)
     def permission_denied(error):
-        return json.dumps({'error': 'Permission denied'}), 401
+        return json.dumps({'error': str(error)}), 401
 
     @app.errorhandler(UNotFound)
     def not_found(error):

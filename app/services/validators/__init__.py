@@ -1,13 +1,16 @@
 import functools
 from typing import Type
 from flask import request
-from marshmallow import EXCLUDE, Schema
+from marshmallow import EXCLUDE, Schema, fields
 
 
 
 class BaseSchema(Schema):
     class Meta:
         unknown = EXCLUDE
+
+    page = fields.Integer()
+    per_page = fields.Integer()
 
 
 
