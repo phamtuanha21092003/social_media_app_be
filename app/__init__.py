@@ -28,7 +28,7 @@ def create_app(config=Config()):
 
     __init_extensions(app)
 
-    _config_error_handlers(app)
+    __config_error_handlers(app)
 
     __config_blueprints(app)
 
@@ -57,7 +57,7 @@ def __config_blueprints(app: Flask):
     app.register_blueprint(api_blueprint)
 
 
-def _config_error_handlers(app: Flask):
+def __config_error_handlers(app: Flask):
     @app.errorhandler(RateLimitException)
     def rate_limit_error_handler(error):
         # TODO: Should change the error message format in future
