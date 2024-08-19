@@ -1,9 +1,11 @@
-from sqlalchemy import select
-from models import AccountUser
-from .base import BaseModelService
+from typing import List
+from sqlalchemy import or_, select
 from flask_bcrypt import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token, create_refresh_token
+from models.account_friend import AccountFriend
+from models import AccountUser
 from app.common.errors import UPermissionDenied
+from .base import BaseModelService
 
 
 class AccountUserService(BaseModelService):
@@ -32,3 +34,15 @@ class AccountUserService(BaseModelService):
         refresh_token = create_refresh_token(identity=user)
 
         return access_token, refresh_token
+
+
+    def get_friends(self, id: int, limit: int, offset: int) -> tuple[int, List[AccountUser]]:
+        query = select(AccountUser, )\
+            .join(AccountFriend, or_(AccountFriend.target_id == AccountUser.id, AccountFriend.creator_id == AccountUser.id))\
+            .filter(or_(AccountFriend.creator_id == id, AccountFriend.target_id == id))
+
+        total = self.get_total(query)
+
+        friends = self.session.scalars(query.limit(limit).offset(offset)).all() 
+
+        return total, friends

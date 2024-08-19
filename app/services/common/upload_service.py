@@ -1,7 +1,6 @@
 import os
 import boto3
 from app.common.errors import UBadRequest
-from flask import request
 
 
 

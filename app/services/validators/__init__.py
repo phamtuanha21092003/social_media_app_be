@@ -2,6 +2,7 @@ import functools
 from typing import Type
 from flask import request
 from marshmallow import EXCLUDE, Schema, fields
+from app.common.errors import UBadRequest
 
 
 
@@ -65,3 +66,19 @@ def validate_params(validate_schema: Type[BaseSchema]):
         return wrapper
 
     return decorator
+
+
+
+def get_limit_from_page(params: dict) -> tuple[int, int]:
+    try:
+        page = int(params.get('page', 1))
+        per_page = int(params.get('per_page', 10))
+    except Exception:
+        raise UBadRequest('Invalid limit or offset')
+    limit = per_page
+    offset = (page - 1) * per_page
+    if limit > 100 or limit < 0:
+        raise UBadRequest('Limit invalid. Maxinum limit is 100')
+    if offset < 0:
+        raise UBadRequest('Page info invalid')
+    return limit, offset
