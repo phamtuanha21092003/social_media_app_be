@@ -13,7 +13,7 @@ class BaseModelService:
         return db.session.scalars(select(self.model).where(self.model.id == model_id)).first()
 
 
-    def create(self, is_flush: bool = True, is_commit: bool = True, **data):
+    def create(self, is_flush: bool=True, is_commit: bool=True, **data):
         obj = self.model()
 
         for key, value in data.items():
@@ -27,6 +27,19 @@ class BaseModelService:
         if is_commit:
             db.session.commit()
 
+        return obj
+
+
+    def update(self, obj: Type[BaseModel], id: int|None=None, is_flush: bool=True, only: tuple=None, **data):
+        if id: 
+            obj = self.find_by_id(id)
+
+        if obj:
+            for k in data:
+                if hasattr(obj, k) and (only is None or k in only):
+                    setattr(obj, k, data.get(k))
+        if is_flush:
+            self.session.flush()
         return obj
 
 
@@ -67,3 +80,7 @@ class BaseModelService:
             return self.session.scalars(query).all(), total
 
         return self.session.scalars(query).all()
+
+
+    def first(self, **kwargs) -> BaseModel | None:
+        return self.session.scalars(select(self.model).filter_by(**kwargs)).first()

@@ -23,11 +23,11 @@ class BaseSerializer(Schema):
         super().__init__(*args, **kwargs)
 
 
-    def dump_data(self, records, many=None):
+    def dump_data(self, records, many=False):
         if many is not None:
             self.many = many
 
-        prefetch_data = records if self.many is True else [records]
+        prefetch_data = records if self.many else [records]
         self._add_prefetch_data(prefetch_data)
 
         return self.dump(records)
