@@ -2,8 +2,7 @@ from flask_restful import Resource
 from app.services.validators.auth.sign_up import SignUpRequestSchema
 from app.services import validate_body
 from app.services.models import AccountUserService
-from app.helpers.session_scope import session_scope
-
+from db import session_scope
 
 class SignUp(Resource):
     def __init__(self) -> None:

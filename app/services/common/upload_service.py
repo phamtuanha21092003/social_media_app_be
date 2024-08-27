@@ -29,7 +29,7 @@ class UploadService():
 
         s3.upload_fileobj(file, UploadService.S3_BUCKET, f"{suffix}.{extension}", ExtraArgs={ "ACL": "public-read", "ContentType": file.content_type, "CacheControl": "max-age=31536000" })
 
-        return f"{UploadService.CDN}/{suffix}.{extension}"
+        return f"{UploadService.CDN}{suffix}.{extension}"
 
 
     def __allowed_image(self, extension: str) -> bool:

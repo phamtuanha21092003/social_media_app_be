@@ -3,6 +3,7 @@ from .base import BaseSerializer
 
 
 class SerializerAccountUser(BaseSerializer):
+    id = fields.Integer()
     name = fields.String()
     email = fields.String()
     is_active = fields.Boolean()

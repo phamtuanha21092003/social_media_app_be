@@ -1,4 +1,4 @@
-from marshmallow import fields
+from marshmallow import RAISE, fields
 from .. import BaseSchema
 
 
@@ -9,6 +9,9 @@ class GetFriendsRequestSchema(BaseSchema):
 
 
 class UpdateProfileRequestSchema(BaseSchema):
+    class Meta:
+        unknown = RAISE
+
     name = fields.Str()
     phone = fields.Str()
     address = fields.Str()

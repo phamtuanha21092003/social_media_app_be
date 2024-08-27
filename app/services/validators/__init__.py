@@ -78,7 +78,7 @@ def get_limit_from_page(params: dict) -> tuple[int, int]:
     limit = per_page
     offset = (page - 1) * per_page
     if limit > 100 or limit < 0:
-        raise UBadRequest('Limit invalid. Maxinum limit is 100')
+        raise UBadRequest('Limit invalid. Maximum limit is 100')
     if offset < 0:
         raise UBadRequest('Page info invalid')
     return limit, offset

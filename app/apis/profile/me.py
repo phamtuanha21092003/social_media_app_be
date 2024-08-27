@@ -21,7 +21,7 @@ class Me(Resource):
 
     @jwt_required()
     @validate_body(UpdateProfileRequestSchema)
-    def post(self):
+    def put(self):
         with session_scope():
             avatar_url = self.body.get('avatar')
 
@@ -38,4 +38,4 @@ class Me(Resource):
                 else:
                     self.avatar_service.create(account_user_id=current_user.id, url=avatar_url)
 
-        return { 'message': 'Update successfully' }
+        return { 'message': 'Updated successfully' }
