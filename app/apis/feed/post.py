@@ -19,7 +19,7 @@ class Post(Resource):
 
         posts, total = self.post_service.find(limit=limit, offset=offset, is_get_total=True, account_user_id=current_user.id)
 
-        return { "total": total, "data": SerializerPost(many=True).dump_data(posts) }
+        return { "total": total, "data": SerializerPost(many=True, exclude=["comments"]).dump_data(posts) }
 
 
     @jwt_required()

@@ -1,6 +1,8 @@
 from marshmallow import EXCLUDE, Schema, fields
 from db import db
 
+
+
 class BaseSerializer(Schema):
     class Meta:
         unknown = EXCLUDE
