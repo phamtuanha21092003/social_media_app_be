@@ -2,6 +2,8 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime, timezone
 from sqlalchemy import desc
 import typing
+
+from models import comment
 from .base import BaseModel, TimestampModel
 from .avatar import Avatar
 from .post import Post
@@ -26,11 +28,12 @@ class AccountUser(BaseModel, TimestampModel):
     )
 
     posts: Mapped[typing.List["Post"]] = relationship(
-        "Post",
         back_populates="account_user",
         order_by=lambda: [desc(Post.created)],
         lazy="dynamic",
     )
+
+    comments: Mapped[typing.List["comment.Comment"]] = relationship(back_populates="account_user", lazy="dynamic")
 
     @property
     def avatar(self):

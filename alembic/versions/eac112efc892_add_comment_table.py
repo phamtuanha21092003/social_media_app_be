@@ -23,12 +23,11 @@ def upgrade() -> None:
         "comment",
         sa.Column('id', sa.Integer(), autoincrement=True, nullable=False, primary_key=True),
         sa.Column('account_user_id', sa.Integer(), sa.ForeignKey("account_user.id"), nullable=False),
-        sa.Column('post_id', sa.Integer(), sa.ForeignKey("post.id",  ondelete='CASCADE'), nullable=True),
+        sa.Column('post_id', sa.Integer(), sa.ForeignKey("post.id",  ondelete='CASCADE'), nullable=False),
         sa.Column('reply_id', sa.Integer, sa.ForeignKey('comment.id',  ondelete='CASCADE'), nullable=True, default=None),
         sa.Column('title', sa.String(length=255), nullable=False),
         sa.Column('created', sa.DateTime(), default=sa.func.current_timestamp()),
         sa.Column('updated', sa.DateTime(), default=sa.func.current_timestamp(), onupdate=sa.func.current_timestamp()),
-        sa.CheckConstraint('post_id IS NOT NULL OR reply_id IS NOT NULL', name='ck_comment_post_reply'),
     )
 
 

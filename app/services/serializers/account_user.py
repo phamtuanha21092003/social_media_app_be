@@ -12,4 +12,3 @@ class SerializerAccountUser(BaseSerializer):
 
     def _add_prefetch_data(self, records):
         pass
-    

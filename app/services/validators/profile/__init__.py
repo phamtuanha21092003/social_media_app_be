@@ -1,9 +1,9 @@
 from marshmallow import RAISE, ValidationError, fields, validates
-from .. import BaseSchema
+from .. import BaseSchema, PagingSchema
 
 
 
-class GetFriendsRequestSchema(BaseSchema):
+class GetFriendsRequestSchema(PagingSchema):
     keyword = fields.Str()
 
 

@@ -10,23 +10,11 @@ class BaseSerializer(Schema):
     def __init__(self, *args, **kwargs):
         self.prefetch_data = {}
         self.session = db.session
-        self.include = kwargs.pop('include', ())
-        self.only = None
-        self.exclude = None
-
-        if 'only' in kwargs:
-            self.only = kwargs['only']
-
-        if 'exclude' in kwargs:
-            self.exclude = kwargs['exclude']
 
         super().__init__(*args, **kwargs)
 
 
-    def dump_data(self, records, many=False):
-        if many is not None:
-            self.many = many
-
+    def dump_data(self, records):
         prefetch_data = records if self.many else [records]
         self._add_prefetch_data(prefetch_data)
 
@@ -70,3 +58,17 @@ class RoundedFloatField(fields.Float):
             return value
 
         return round(value, self.digits)
+
+
+
+def serializer_date_time(value):
+    from datetime import datetime, date
+
+    if isinstance(value, datetime):
+        datetime_str = value.isoformat()
+        return datetime_str if value.tzinfo else f'{datetime_str}+00:00'
+
+    if isinstance(value, date):
+        return value.isoformat()
+
+    raise ValueError('Invalid datetime format')

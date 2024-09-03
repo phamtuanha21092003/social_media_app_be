@@ -14,6 +14,7 @@ class Post(BaseModel, TimestampModel):
 
     title: Mapped[str] = mapped_column(nullable=False)
     url: Mapped[str] = mapped_column(nullable=True)
+    comment_count: Mapped[int] = mapped_column(default=0)
 
     account_user_id: Mapped[int] = mapped_column(ForeignKey("account_user.id"), nullable=False, index=True)
     account_user: Mapped["AccountUser"] = relationship(back_populates="posts")
