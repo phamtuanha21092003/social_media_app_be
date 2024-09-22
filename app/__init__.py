@@ -16,6 +16,7 @@ from .common.errors import (
 )
 from ratelimit import RateLimitException
 from marshmallow import ValidationError
+from sqlalchemy.exc import IntegrityError
 
 
 jwt = JWTManager()
@@ -108,3 +109,8 @@ def __config_error_handlers(app: Flask):
     def bad_request(error):
         error_message = str(error) or 'Bad Request'
         return json.dumps({'error': error_message}), 400
+
+    @app.errorhandler(IntegrityError)
+    def integrity_error(error):
+        error_message = str(error) or 'Integrity Error'
+        return json.dumps({'error': error_message}), 500
