@@ -17,9 +17,10 @@ class SerializerPost(ModelSerializer):
     title = fields.String()
     url = fields.String()
     comments = fields.Method('get_comments')
-    created = fields.DateTime('%Y-%m-%d %H:%M:%S')
+    created = fields.DateTime('%Y-%m-%d %H:%M:%S+00:00')
     account_user_id = fields.Integer()
     comment_count = fields.Integer()
+    like_count = fields.Integer()
     avatar = fields.Method("get_avatar")
     name = fields.Method("get_name")
 
@@ -71,7 +72,7 @@ class SerializerPost(ModelSerializer):
 
         post_ids = { record.id for record in records }
 
-        comments = self.comment_service.find(post_id=list(post_ids))
+        comments = self.comment_service.find(post_id=list(post_ids), order_bys=[self.comment_service.model.created.desc()])
 
 
         for _post in records:

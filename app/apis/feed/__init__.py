@@ -1,14 +1,15 @@
 from flask import Blueprint
 from flask_restful import Api
-from .post import Post
-
+from .posts import Posts, Post, Comments
 
 feed_blueprint = Blueprint("post_blueprint", __name__, url_prefix="/feed")
 feed_api = Api(feed_blueprint)
 
 
 feed_resources = {
-    "/posts": Post,
+    "/posts": Posts,
+    "/post/<int:id>": Post,
+    "/comments/<int:post_id>": Comments,
 }
 
 

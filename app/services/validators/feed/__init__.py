@@ -1,5 +1,4 @@
-
-from marshmallow import  ValidationError, fields, validates
+from marshmallow import ValidationError, fields, validates
 from app.services.validators import BaseSchema
 
 

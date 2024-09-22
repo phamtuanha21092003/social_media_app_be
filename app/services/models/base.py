@@ -9,6 +9,7 @@ class BaseModelService:
     model: Type[BaseModel] = None
     session = db.session
 
+
     def find_by_id(self, model_id: int):
         return db.session.scalars(select(self.model).where(self.model.id == model_id)).first()
 
@@ -50,7 +51,7 @@ class BaseModelService:
 
 
     # kwargs is used to pass the filter condition
-    def find(self, selectors=None, joiners: list=[], is_get_total: bool=False, is_get_query: bool=False, **kwargs):
+    def find(self, selectors=None, joiners: list=[], is_get_total: bool=False, is_get_query: bool=False, order_bys: list=[], **kwargs):
         if selectors is None:
             selectors = (self.model, )
 
@@ -72,15 +73,35 @@ class BaseModelService:
         if is_get_query:
             return query
 
-        if limit and offset:
+        if is_get_total:
+            total = self.get_total(query)
+
+        if len(order_bys) > 0:
+            query = query.order_by(*order_bys)
+
+        if not (limit is None or offset is None):
             query = query.limit(limit).offset(offset)
 
         if is_get_total:
-            total = self.get_total(query)
             return self.session.scalars(query).all(), total
 
         return self.session.scalars(query).all()
 
 
-    def first(self, **kwargs) -> BaseModel | None:
-        return self.session.scalars(select(self.model).filter_by(**kwargs)).first()
+    def first(self, selectors=None, joiners: list=[], **kwargs):
+        if selectors is None:
+            selectors = (self.model, )
+
+        query = select(*selectors)
+
+        for join in joiners:
+            query = query.join(*join)
+
+        for key, value in kwargs.items():
+            if isinstance(value, list):
+                query = query.filter(getattr(self.model, key).in_(value))
+                continue
+
+            query = query.filter(getattr(self.model, key) == value)
+
+        return self.session.scalars(query).first()

@@ -36,7 +36,7 @@ def validate_body(validate_schema: Type[BaseSchema], is_many=False):
             content_type = request.headers.get('Content-Type', '')
 
             if is_form(content_type):
-                self.body = validate_schema().load(request.form)
+                self.body = validate_schema().load(request.form.to_dict())
 
             else:
                 self.body = validate_schema(many=is_many).load(request.get_json(force=True))
