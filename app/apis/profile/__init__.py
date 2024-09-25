@@ -1,6 +1,6 @@
 from flask import Blueprint
 from flask_restful import Api
-from .friends import Friends
+from .friends import Friends, Friend, FriendShips, FriendSuggestion
 from .me import Me
 
 
@@ -10,7 +10,11 @@ profile_api = Api(profile_blueprint)
 
 profile_routers = {
     '/friends': Friends,
+    '/friend/<int:target_id>': Friend,
     '/me': Me,
+    '/friendships': FriendShips,
+    '/friend_suggestions': FriendSuggestion,
+    # todo: api cancel friendship
 }
 
 

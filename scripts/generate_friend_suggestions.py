@@ -1,5 +1,5 @@
 import os
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine, text, func
 
 
 engine = create_engine(os.getenv("DATABASE_URI"), echo=True)
@@ -25,6 +25,6 @@ with engine.connect() as conn:
             for friend_friend in friends_dict[friend]:
                 if friend_friend != user_id and user_id not in friend_suggestions_dict[friend_friend]:
                     friend_suggestions_dict[user_id].add(friend_friend)
-                    conn.execute(text("INSERT INTO account_user_people_you_may_know (creator_id, target_id) VALUES (%s, %s)"), (user_id, friend_friend))
+                    conn.execute(text("INSERT INTO account_user_people_you_may_know (creator_id, target_id) VALUES (:creator_id, :target_id)"), {"creator_id": user_id, "target_id": friend_friend})
 
     conn.commit()

@@ -24,3 +24,8 @@ class UpdateProfileRequestSchema(BaseSchema):
             raise ValidationError('{} must be upload to min io'.format(image))
 
         return True
+
+
+
+class ConfirmFriendShipPostRequestSchema(BaseSchema):
+    creator_id = fields.Integer(required=True, allow_none=False)
