@@ -32,8 +32,9 @@ class AccountUserService(BaseModelService):
 
         access_token = create_access_token(identity=user)
         refresh_token = create_refresh_token(identity=user)
+        user_id = user.id
 
-        return access_token, refresh_token
+        return access_token, refresh_token, user_id
 
 
     def get_friends(self, id: int, limit: int, offset: int) -> tuple[int, List[AccountUser]]:
@@ -48,31 +49,27 @@ class AccountUserService(BaseModelService):
         return total, friends
 
 
+    # todo: fix this api use 1 raw query
+    # this function get all user not is friend of this user
+    # order by if have in account_user_people_you_may_know
     def get_friend_suggestions(self, id: int, limit: int, offset: int):
-        # todo: add paging
+        query = text(
+            """
+                SELECT au.id, au.name, a.url as avatar
+                FROM account_user au
+                LEFT JOIN avatar a ON a.account_user_id = au.id
+                WHERE au.id IN (
+                    SELECT
+                        CASE 
+                            WHEN creator_id = :id THEN target_id
+                            ELSE creator_id
+                        END AS id
+                    FROM account_user_people_you_may_know
+                    WHERE creator_id = :id OR target_id = :id
+                    LIMIT 5
+                    OFFSET 0
+                )
+            """
+        )
 
-        query_str = text("""
-            SELECT au.*, av.url as avatar
-            FROM account_user au
-            LEFT JOIN avatar av
-                ON av.account_user_id = au.id
-            LEFT JOIN account_user_people_you_may_know aupymk 
-                ON aupymk.creator_id  = au.id OR aupymk.target_id = au.id
-            WHERE au.id != :id AND au.id NOT IN (
-                SELECT 
-                  CASE 
-                    WHEN creator_id = :id THEN target_id 
-                    ELSE creator_id 
-                  END AS friend_id
-                FROM account_friend af
-                WHERE af.creator_id = :id OR af.target_id = :id	
-            )
-            ORDER BY 
-            	CASE
-                    WHEN aupymk.id IS NULL THEN 2
-                    ELSE 1
-                END
-        """)
-
-        return self.session.execute(query_str, {'id': id}).all()
-
+        return self.session.execute(query, {'id': id}).all()

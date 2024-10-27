@@ -1,4 +1,4 @@
-from sqlalchemy import Select, func, select
+from sqlalchemy import Select, func, select, exc
 from db import db
 from models import BaseModel
 from typing import Type
@@ -105,3 +105,13 @@ class BaseModelService:
             query = query.filter(getattr(self.model, key) == value)
 
         return self.session.scalars(query).first()
+
+
+    def delete(self, obj, is_flush=True):
+        try:
+            self.session.delete(obj)
+            if is_flush:
+                self.session.flush()
+            return True
+        except exc.IntegrityError as e:
+            raise e

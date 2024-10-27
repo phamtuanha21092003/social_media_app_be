@@ -3,7 +3,7 @@ from flask_jwt_extended import jwt_required, current_user
 from app.services.models.account_user import AccountUserService
 from app.services.models.avatar_service import AvatarService
 from app.services.serializers.account_user import SerializerAccountUser
-from app.services.validators import  validate_body
+from app.services.validators import validate_body
 from app.services.validators.profile import UpdateProfileRequestSchema
 from db import session_scope
 
@@ -16,7 +16,7 @@ class Me(Resource):
 
     @jwt_required()
     def get(self):
-        return { 'message': '', 'data': SerializerAccountUser().dump_data(current_user) }
+        return {'message': 'successfully', 'data': SerializerAccountUser().dump_data(current_user)}
 
 
     @jwt_required()

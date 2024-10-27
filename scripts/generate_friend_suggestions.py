@@ -12,9 +12,14 @@ with engine.connect() as conn:
     users = conn.execute(text("SELECT id FROM account_user"))
     users = {_user.id for _user in users}
 
-    fiends = conn.execute(text("SELECT creator_id, target_id FROM account_friend"))
+    friends = conn.execute(text("SELECT creator_id, target_id FROM account_friend"))
+    friend_ships = conn.execute(text("SELECT creator_id, target_id FROM account_friendship WHERE status = 'PENDING'"))
+
     friends_dict = {_user_id: set() for _user_id in users}
-    for friend in fiends:
+    for friend in friends:
+        friends_dict[friend.creator_id].add(friend.target_id)
+        friends_dict[friend.target_id].add(friend.creator_id)
+    for friend in friend_ships:
         friends_dict[friend.creator_id].add(friend.target_id)
         friends_dict[friend.target_id].add(friend.creator_id)
 
@@ -23,7 +28,7 @@ with engine.connect() as conn:
     for user_id in users:
         for friend in friends_dict[user_id]:
             for friend_friend in friends_dict[friend]:
-                if friend_friend != user_id and user_id not in friend_suggestions_dict[friend_friend]:
+                if friend_friend != user_id and user_id not in friend_suggestions_dict[friend_friend] and user_id not in friends_dict[friend_friend]:
                     friend_suggestions_dict[user_id].add(friend_friend)
                     conn.execute(text("INSERT INTO account_user_people_you_may_know (creator_id, target_id) VALUES (:creator_id, :target_id)"), {"creator_id": user_id, "target_id": friend_friend})
 

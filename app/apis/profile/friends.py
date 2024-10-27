@@ -7,6 +7,7 @@ from app.services import validate_params, validate_body
 from app.services.serializers import SerializerAccountUser
 from app.services.validators import get_limit_from_page, PagingSchema
 from app.services.validators.profile import GetFriendsRequestSchema, ConfirmFriendShipPostRequestSchema
+from app.services.models.account_user_people_you_may_know import AccountUserPeopleYouMayKnowService
 from app.common.errors import UNotFound
 from db import session_scope
 from app.utils.dict import to_dict
@@ -34,6 +35,7 @@ class Friend(Resource):
     def __init__(self) -> None:
         self.account_user_service = AccountUserService()
         self.account_friendship_service = AccountFriendshipService()
+        self.account_user_people_you_may_know_service = AccountUserPeopleYouMayKnowService()
 
 
     @jwt_required()
@@ -47,6 +49,7 @@ class Friend(Resource):
 
         with session_scope():
             self.account_friendship_service.add_friend(user_id, target_id)
+            self.account_user_people_you_may_know_service.remove_suggesstions(user_id, target_id)
 
             return {"message": "Add friend successfully"}
 
@@ -66,10 +69,9 @@ class FriendShips(Resource):
 
     @jwt_required()
     def get(self):
-        # todo: add paging in this api
         user_id = current_user.id
 
-        friendships, total = self.account_friendship_service.find(target_id=user_id, status="PENDING", order_bys=[self.account_friendship_service.model.created.desc()], is_get_total=True, limit=10, offset=0)
+        friendships, total = self.account_friendship_service.find(target_id=user_id, status="PENDING", order_bys=[self.account_friendship_service.model.created.desc()], is_get_total=True)
 
         return {'data': to_dict(friendships), 'total': total}
 
@@ -81,10 +83,10 @@ class FriendShips(Resource):
 
         creator_id = self.body.get('creator_id')
 
-        friendship = self.account_friendship_service.first(creator_id=creator_id, target_id=target_id)
+        friendship = self.account_friendship_service.first(creator_id=creator_id, target_id=target_id, status="PENDING")
 
-        if not friendship:
-            raise UNotFound('Friendship not found')
+        if friendship:
+            raise UNotFound('Friendship is existing')
 
         with session_scope():
             self.account_friendship_service.update(friendship, status="ACCEPTED")

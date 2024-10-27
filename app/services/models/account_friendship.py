@@ -23,6 +23,10 @@ class AccountFriendshipService(BaseModelService):
         )).first()
 
         if friendship:
+            if friendship.status == 'CANCEL':
+                self.update(friendship, status='PENDING')
+                return
+
             raise UBadRequest("Friendship does exist")
 
         self.create(creator_id=user_id, target_id=target_id)

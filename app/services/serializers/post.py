@@ -60,7 +60,7 @@ class SerializerPost(ModelSerializer):
     def _add_prefetch_data(self, records):
         user_ids = set()
 
-        if 'comments' in self.exclude or ( self.only and 'comments' not in self.only ):
+        if 'comments' in self.exclude or (self.only and 'comments' not in self.only):
             for _post in records:
                 user_ids.add(_post.account_user_id)
 

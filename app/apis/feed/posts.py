@@ -2,9 +2,10 @@ from flask_restful import Resource
 from flask_jwt_extended import jwt_required, current_user
 from app.services.models.comment import CommentService
 from app.services.models.post import PostService
+from app.services.models import AccountUserService
 from app.services.serializers.post import SerializerPost
-from app.services.validators import PagingSchema, get_limit_from_page, validate_body, validate_params
-from app.services.validators.feed import CreatePostRequest
+from app.services.validators import get_limit_from_page, validate_body, validate_params
+from app.services.validators.feed import CreatePostRequestSchema, GetPostRequestSchema
 from app.services.validators.feed.post import CommentsRequestSchema
 from db import session_scope
 from app import UNotFound
@@ -13,20 +14,37 @@ from app import UNotFound
 class Posts(Resource):
     def __init__(self) -> None:
         self.post_service = PostService()
+        self.account_user_service = AccountUserService()
 
 
     @jwt_required()
-    @validate_params(PagingSchema)
+    @validate_params(GetPostRequestSchema)
     def get(self):
         limit, offset = get_limit_from_page(self.params)
 
-        posts, total = self.post_service.find(limit=limit, offset=offset, is_get_total=True, account_user_id=current_user.id, order_bys=[self.post_service.model.created.desc()])
+        user_id = self.params.get("user_id")
+
+        kwargs = {
+            'limit': limit,
+            'offset': offset,
+            'is_get_total': True,
+            'order_bys': [self.post_service.model.created.desc()],
+        }
+
+        if user_id:
+            user = self.account_user_service.find_by_id(user_id)
+            if not user:
+                raise UNotFound("User not found")
+
+            kwargs.update({'account_user_id': user_id})
+
+        posts, total = self.post_service.find(**kwargs)
 
         return {"total": total, "data": SerializerPost(many=True, exclude=["comments"]).dump_data(posts)}
 
 
     @jwt_required()
-    @validate_body(CreatePostRequest)
+    @validate_body(CreatePostRequestSchema)
     def post(self):
         with session_scope():
             post = self.post_service.create(account_user_id=current_user.id, **self.body)

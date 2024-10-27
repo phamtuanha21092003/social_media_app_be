@@ -18,7 +18,7 @@ class Upload(Resource):
     @jwt_required()
     def post(self):
         files = request.files.getlist('files')
-        urls  = []
+        urls = []
         errors = []
 
         for file in files:

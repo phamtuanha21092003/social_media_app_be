@@ -1,8 +1,8 @@
 from marshmallow import ValidationError, fields, validates
-from app.services.validators import BaseSchema
+from app.services.validators import BaseSchema, PagingSchema
 
 
-class CreatePostRequest(BaseSchema):
+class CreatePostRequestSchema(BaseSchema):
     title = fields.Str(required=True)
     url = fields.Str(allow_none=True)
 
@@ -12,3 +12,8 @@ class CreatePostRequest(BaseSchema):
             raise ValidationError('{} must be upload to min io'.format(image))
 
         return True
+
+
+
+class GetPostRequestSchema(PagingSchema):
+    user_id = fields.Int()

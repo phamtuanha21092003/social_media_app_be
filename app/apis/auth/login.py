@@ -12,6 +12,6 @@ class Login(Resource):
 
     @validate_body(LoginRequestSchema)
     def post(self):
-        access_token, refresh_token = self.acount_user_service.login(**self.body)
+        access_token, refresh_token, user_id = self.acount_user_service.login(**self.body)
 
-        return { 'access_token': access_token, 'refresh_token': refresh_token }
+        return {'access_token': access_token, 'refresh_token': refresh_token, 'user_id': user_id}
