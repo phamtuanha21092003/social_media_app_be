@@ -58,7 +58,7 @@ def validate_params(validate_schema: Type[BaseSchema]):
             self = args[0]
             params = request.args.to_dict()
 
-            for key in params.keys():
+            for key in list(params.keys()):
                 if key[-2:] == '[]':
                     params[key[:-2]] = request.args.getlist(key)
                     params.pop(key, None)
