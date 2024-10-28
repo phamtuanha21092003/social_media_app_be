@@ -6,7 +6,7 @@ from app.services.models.account_friend import AccountFriendService
 from app.services import validate_params, validate_body
 from app.services.serializers import SerializerAccountUser
 from app.services.validators import get_limit_from_page, PagingSchema
-from app.services.validators.profile import GetFriendsRequestSchema, ConfirmFriendShipPostRequestSchema
+from app.services.validators.profile import GetFriendsRequestSchema, ConfirmFriendShipPostRequestSchema, FriendshipGetRequestSchema
 from app.services.models.account_user_people_you_may_know import AccountUserPeopleYouMayKnowService
 from app.common.errors import UNotFound
 from db import session_scope
@@ -68,10 +68,13 @@ class FriendShips(Resource):
 
 
     @jwt_required()
+    @validate_params(FriendshipGetRequestSchema)
     def get(self):
         user_id = current_user.id
 
-        friendships, total = self.account_friendship_service.find(target_id=user_id, status="PENDING", order_bys=[self.account_friendship_service.model.created.desc()], is_get_total=True)
+        status = self.params.get("status")
+
+        friendships, total = self.account_friendship_service.find(target_id=user_id, status=status, order_bys=[self.account_friendship_service.model.created.desc()], is_get_total=True)
 
         return {'data': to_dict(friendships), 'total': total}
 

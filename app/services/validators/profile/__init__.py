@@ -1,6 +1,6 @@
-from marshmallow import RAISE, ValidationError, fields, validates
+from marshmallow import RAISE, ValidationError, fields, validates, validate
 from .. import BaseSchema, PagingSchema
-
+from models.account_friendship import Status
 
 
 class GetFriendsRequestSchema(PagingSchema):
@@ -29,3 +29,8 @@ class UpdateProfileRequestSchema(BaseSchema):
 
 class ConfirmFriendShipPostRequestSchema(BaseSchema):
     creator_id = fields.Integer(required=True, allow_none=False)
+
+
+
+class FriendshipGetRequestSchema(BaseSchema):
+    status = fields.List(fields.Str(allow_none=True, validate=validate.OneOf(Status.__args__), missing="PENDING"))
