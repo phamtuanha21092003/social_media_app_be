@@ -37,10 +37,13 @@ class AccountUserService(BaseModelService):
         return access_token, refresh_token, user_id
 
 
-    def get_friends(self, id: int, limit: int, offset: int) -> tuple[int, List[AccountUser]]:
+    def get_friends(self, id: int, limit: int, offset: int, keyword) -> tuple[int, List[AccountUser]]:
         query = select(AccountUser, )\
             .join(AccountFriend, or_(AccountFriend.target_id == AccountUser.id, AccountFriend.creator_id == AccountUser.id))\
             .filter(or_(AccountFriend.creator_id == id, AccountFriend.target_id == id), AccountUser.id != id)
+
+        if keyword:
+            query = query.filter(AccountUser.name.ilike(f'%{keyword}%'))
 
         total = self.get_total(query)
 

@@ -5,7 +5,7 @@ from models.base import BaseModel, TimestampModel
 from typing import Literal
 
 
-Status = Literal['PENDING', 'ACCEPTED', 'CANCELED']
+Status = Literal['PENDING', 'ACCEPTED', 'CANCELED', 'DELETED']
 
 
 class AccountFriendship(BaseModel, TimestampModel):

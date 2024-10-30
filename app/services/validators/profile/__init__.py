@@ -32,5 +32,11 @@ class ConfirmFriendShipPostRequestSchema(BaseSchema):
 
 
 
-class FriendshipGetRequestSchema(BaseSchema):
-    status = fields.List(fields.Str(allow_none=True, validate=validate.OneOf(Status.__args__), missing="PENDING"))
+class FriendshipGetRequestSchema(PagingSchema):
+    status = fields.List(fields.Str(allow_none=True, validate=validate.OneOf(Status.__args__)), allow_none=False)
+    keyword = fields.Str()
+
+
+
+class DeleteFriendShipRequestSchema(BaseSchema):
+    creator_id = fields.Integer(required=True, allow_none=False)
