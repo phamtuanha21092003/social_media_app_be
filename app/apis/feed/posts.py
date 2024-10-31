@@ -5,10 +5,11 @@ from app.services.models.post import PostService
 from app.services.models import AccountUserService
 from app.services.serializers.post import SerializerPost
 from app.services.validators import get_limit_from_page, validate_body, validate_params
-from app.services.validators.feed import CreatePostRequestSchema, GetPostRequestSchema
+from app.services.validators.feed import CreatePostRequestSchema, GetPostsRequestSchema
 from app.services.validators.feed.post import CommentsRequestSchema
 from db import session_scope
-from app import UNotFound
+from app.common.errors import UNotFound
+
 
 
 class Posts(Resource):
@@ -18,7 +19,7 @@ class Posts(Resource):
 
 
     @jwt_required()
-    @validate_params(GetPostRequestSchema)
+    @validate_params(GetPostsRequestSchema)
     def get(self):
         limit, offset = get_limit_from_page(self.params)
 

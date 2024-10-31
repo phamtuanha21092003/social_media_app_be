@@ -6,6 +6,7 @@ from models.account_friend import AccountFriend
 from models import AccountUser
 from app.common.errors import UPermissionDenied
 from .base import BaseModelService
+from sqlalchemy import Select
 
 
 class AccountUserService(BaseModelService):
@@ -76,3 +77,11 @@ class AccountUserService(BaseModelService):
         )
 
         return self.session.execute(query, {'id': id}).all()
+
+
+    def get_users_by_keyword(self, keyword: str, limit: int, offset: int):
+        query = Select(self.model).where(self.model.name.ilike(f'%{keyword}%'))
+
+        total = self.get_total(query)
+
+        return self.session.scalars(query.limit(limit).offset(offset)).all(), total

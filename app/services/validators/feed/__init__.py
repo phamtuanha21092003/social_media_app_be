@@ -15,5 +15,5 @@ class CreatePostRequestSchema(BaseSchema):
 
 
 
-class GetPostRequestSchema(PagingSchema):
+class GetPostsRequestSchema(PagingSchema):
     user_id = fields.Int()

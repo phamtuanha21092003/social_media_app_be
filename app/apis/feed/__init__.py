@@ -2,7 +2,7 @@ from flask import Blueprint
 from flask_restful import Api
 from .posts import Posts, Post, Comments
 
-feed_blueprint = Blueprint("post_blueprint", __name__, url_prefix="/feed")
+feed_blueprint = Blueprint("feed_blueprint", __name__, url_prefix="/feed")
 feed_api = Api(feed_blueprint)
 
 
