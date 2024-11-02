@@ -40,4 +40,4 @@ class AccountUser(BaseModel, TimestampModel):
     @property
     def avatar(self):
         avatar = self.avatars.first()
-        return avatar.url if avatar else "" 
+        return avatar.url if avatar else "http://localhost:9000/wey-bucket/453178253_471506465671661_2781666950760530985_n.png"

@@ -79,9 +79,35 @@ class AccountUserService(BaseModelService):
         return self.session.execute(query, {'id': id}).all()
 
 
-    def get_users_by_keyword(self, keyword: str, limit: int, offset: int):
-        query = Select(self.model).where(self.model.name.ilike(f'%{keyword}%'))
+    # co qua ton ram k khi k co limit offset
+    # orm thi phuc tap ???
+    # raw query thi met ???
+    def get_friend_ids(self, user_id: int):
+        pass
 
-        total = self.get_total(query)
 
-        return self.session.scalars(query.limit(limit).offset(offset)).all(), total
+
+    def get_users_by_keyword(self, keyword: str, limit: int, offset: int, user_id: int) -> tuple[List[AccountUser], int]:
+        query_total = Select(self.model).where(self.model.name.ilike(f'%{keyword}%'))
+
+        total = self.get_total(query_total)
+
+        query_str = """
+            SELECT au."name", au.email, au.id, au.is_active, f.id as friend_id
+            FROM account_user au 
+            LEFT JOIN (
+                SELECT CASE 
+                    WHEN af.creator_id = :user_id THEN af.target_id
+                    ELSE af.creator_id
+                END AS id
+                FROM account_friend af 
+                WHERE creator_id = :user_id OR target_id = :user_id
+            ) f
+            ON f.id = au.id
+            WHERE au."name" ILIKE :keyword
+            ORDER BY f.id
+            LIMIT :limit
+            OFFSET :offset
+        """
+
+        return self.session.execute(text(query_str), {'user_id': user_id, 'keyword': f'%{keyword}%', 'limit': limit, 'offset': offset}).all(), total

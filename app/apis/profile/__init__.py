@@ -24,7 +24,7 @@ class Profile(Resource):
         if not user:
             raise UNotFound("user not found")
 
-        return {'message': 'successfully', 'data': SerializerAccountUser().dump_data(user)}
+        return {'message': 'successfully', 'data': SerializerAccountUser(exclude=["is_friend"]).dump_data(user)}
 
 
 

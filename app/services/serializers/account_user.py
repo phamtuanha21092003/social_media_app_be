@@ -8,6 +8,11 @@ class SerializerAccountUser(BaseSerializer):
     email = fields.String()
     is_active = fields.Boolean()
     avatar = fields.String()
+    is_friend = fields.Method("get_is_friend")
+
+
+    def get_is_friend(self, user):
+        return user.friend_id is not None
 
 
     def _add_prefetch_data(self, records):

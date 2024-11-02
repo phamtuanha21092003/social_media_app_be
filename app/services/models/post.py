@@ -13,4 +13,4 @@ class PostService(BaseModelService):
 
         total = self.get_total(query)
 
-        return self.session.scalars(query.limit(limit).offset(offset)).all(), total
+        return self.session.scalars(query.order_by(self.model.created.desc()).limit(limit).offset(offset)).all(), total

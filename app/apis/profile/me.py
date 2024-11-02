@@ -16,7 +16,7 @@ class Me(Resource):
 
     @jwt_required()
     def get(self):
-        return {'message': 'successfully', 'data': SerializerAccountUser().dump_data(current_user)}
+        return {'message': 'successfully', 'data': SerializerAccountUser(exclude=["is_friend"]).dump_data(current_user)}
 
 
     @jwt_required()

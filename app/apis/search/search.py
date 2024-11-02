@@ -20,6 +20,8 @@ class Search(Resource):
     def get(self):
         params = self.params
 
+        user_id = current_user.id
+
         limit, offset = get_limit_from_page(params)
 
         type = params.get('type', 'ALL')
@@ -30,10 +32,10 @@ class Search(Resource):
         posts = []
         total_posts = 0
 
-        keyword = params.get('keyword')
+        keyword = params.get('keyword').strip()
 
         if type == "ALL" or type == "PEOPLE":
-            users, total_users = self.account_user_service.get_users_by_keyword(keyword, limit, offset)
+            users, total_users = self.account_user_service.get_users_by_keyword(keyword, limit, offset, user_id)
             users = SerializerAccountUser(many=True).dump(users)
 
         if type == "ALL" or type == "POST":

@@ -29,7 +29,7 @@ class Friends(Resource):
 
         total,  friends = self.account_user_service.get_friends(user_id, limit, offset, keyword)
 
-        return {"total": total, "data": SerializerAccountUser(many=True).dump_data(friends)}
+        return {"total": total, "data": SerializerAccountUser(many=True, exclude=["is_friend"]).dump_data(friends)}
 
 
 
@@ -101,7 +101,7 @@ class FriendShips(Resource):
 
         users = self.session.scalars(query).all()
 
-        return {'data': SerializerAccountUser(many=True).dump_data(users), 'total': total}
+        return {'data': SerializerAccountUser(many=True, exclude=["is_friend"]).dump_data(users), 'total': total}
 
 
     @jwt_required()
@@ -156,4 +156,4 @@ class FriendSuggestion(Resource):
 
         friend_suggestions = self.account_user_service.get_friend_suggestions(user_id, limit, offset)
 
-        return {"data": SerializerAccountUser(many=True).dump_data(friend_suggestions), 'total': len(friend_suggestions)}
+        return {"data": SerializerAccountUser(many=True, exclude=["is_friend"]).dump_data(friend_suggestions), 'total': len(friend_suggestions)}
