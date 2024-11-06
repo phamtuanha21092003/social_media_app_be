@@ -6,7 +6,7 @@ from models.account_friend import AccountFriend
 from models import AccountUser
 from app.common.errors import UPermissionDenied
 from .base import BaseModelService
-from sqlalchemy import Select
+from sqlalchemy import Select, or_, and_
 
 
 class AccountUserService(BaseModelService):
@@ -86,24 +86,25 @@ class AccountUserService(BaseModelService):
         pass
 
 
-
     def get_users_by_keyword(self, keyword: str, limit: int, offset: int, user_id: int) -> tuple[List[AccountUser], int]:
         query_total = Select(self.model).where(self.model.name.ilike(f'%{keyword}%'))
 
         total = self.get_total(query_total)
 
         query_str = """
-            SELECT au."name", au.email, au.id, au.is_active, f.id as friend_id
-            FROM account_user au 
+            SELECT au."name", au.email, au.id, au.is_active, f.id as friend_id, av.url as avatar
+            FROM account_user au
             LEFT JOIN (
-                SELECT CASE 
+                SELECT CASE
                     WHEN af.creator_id = :user_id THEN af.target_id
                     ELSE af.creator_id
                 END AS id
-                FROM account_friend af 
+                FROM account_friend af
                 WHERE creator_id = :user_id OR target_id = :user_id
             ) f
             ON f.id = au.id
+            LEFT JOIN avatar av 
+            ON av.account_user_id = au.id
             WHERE au."name" ILIKE :keyword
             ORDER BY f.id
             LIMIT :limit

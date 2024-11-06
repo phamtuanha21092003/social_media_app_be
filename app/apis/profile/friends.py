@@ -37,6 +37,7 @@ class Friend(Resource):
     def __init__(self) -> None:
         self.account_user_service = AccountUserService()
         self.account_friendship_service = AccountFriendshipService()
+        self.account_friend_service = AccountFriendService()
         self.account_user_people_you_may_know_service = AccountUserPeopleYouMayKnowService()
 
 
@@ -55,11 +56,6 @@ class Friend(Resource):
 
             return {"message": "Add friend successfully"}
 
-
-    @jwt_required()
-    def delete(self):
-        # todo: api delete friend
-        pass
 
 
 class FriendShips(Resource):
@@ -114,7 +110,7 @@ class FriendShips(Resource):
         friendship = self.account_friendship_service.first(creator_id=creator_id, target_id=target_id, status="PENDING")
 
         if not friendship:
-            raise UNotFound('Friendship is existing')
+            raise UNotFound('Friendship is not found')
 
         with session_scope():
             self.account_friendship_service.update(friendship, status="ACCEPTED")
@@ -140,6 +136,26 @@ class FriendShips(Resource):
 
 
 
+class FriendShipCancel(Resource):
+    def __init__(self) -> None:
+        self.account_user_service = AccountUserService()
+        self.account_friendship_service = AccountFriendshipService()
+        self.account_friend_service = AccountFriendService()
+
+
+    @jwt_required()
+    def put(self, target_id: int):
+        creator_id = current_user.id
+        friendship = self.account_friendship_service.first(creator_id=creator_id, target_id=target_id, status="PENDING")
+
+        if not friendship:
+            raise UNotFound('Friendship is not found')
+
+        with session_scope():
+            self.account_friendship_service.update(friendship, status="CANCELED")
+
+            return {"message": "success"}
+
 
 
 class FriendSuggestion(Resource):
@@ -157,3 +173,35 @@ class FriendSuggestion(Resource):
         friend_suggestions = self.account_user_service.get_friend_suggestions(user_id, limit, offset)
 
         return {"data": SerializerAccountUser(many=True, exclude=["is_friend"]).dump_data(friend_suggestions), 'total': len(friend_suggestions)}
+
+
+
+class FriendDelete(Resource):
+    def __init__(self) -> None:
+        self.account_user_service = AccountUserService()
+        self.account_friendship_service = AccountFriendshipService()
+        self.account_friend_service = AccountFriendService()
+
+
+    @jwt_required()
+    def delete(self, friend_id: int):
+        user_id = current_user.id
+
+        friend = self.account_friend_service.find_by_id(friend_id)
+        if not friend:
+            raise UNotFound('Friend is not found')
+
+        if user_id not in [friend.creator_id, friend.target_id]:
+            raise UNotFound("Friend is not found")
+
+        friendship = self.account_friendship_service.get_friendship(creator_id=friend.creator_id, target_id=friend.target_id, status="ACCEPTED")
+
+        if not friendship:
+            raise UNotFound('Friendship is not found')
+
+        with session_scope():
+            self.account_friendship_service.update(friendship, status="DELETED")
+
+            self.account_friend_service.delete(friend)
+
+            return {'message': 'success'}

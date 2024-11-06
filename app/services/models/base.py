@@ -115,3 +115,14 @@ class BaseModelService:
             return True
         except exc.IntegrityError as e:
             raise e
+
+
+    def where(self, query, **kwargs):
+        for key, value in kwargs.items():
+            if isinstance(value, list):
+                query = query.where(getattr(self.model, key).in_(value))
+                continue
+
+            query = query.where(getattr(self.model, key) == value)
+
+        return query

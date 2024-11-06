@@ -35,7 +35,7 @@ class Search(Resource):
         keyword = params.get('keyword').strip()
 
         if type == "ALL" or type == "PEOPLE":
-            users, total_users = self.account_user_service.get_users_by_keyword(keyword, limit, offset, user_id)
+            users, total_users = self.account_user_service.get_users_by_keyword(keyword, limit if type == "PEOPLE" else 4, offset if type == "PEOPLE" else 0, user_id)
             users = SerializerAccountUser(many=True).dump(users)
 
         if type == "ALL" or type == "POST":
