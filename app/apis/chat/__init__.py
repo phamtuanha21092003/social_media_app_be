@@ -1,12 +1,13 @@
 from flask import Blueprint
 from flask_restful import Api
+from .conversation import ConversationCreateOrGet
 
 chat_blueprint = Blueprint("chat_blueprint", __name__, url_prefix="/chat")
 chat_api = Api(chat_blueprint)
 
 
 chat_resources = {
-
+    '/conversations/<int:user_id>/create_or_get': ConversationCreateOrGet,
 }
 
 
