@@ -27,7 +27,7 @@ class UploadService():
 
         s3 = boto3.client('s3', endpoint_url=UploadService.S3_ENDPOINT_URL, aws_access_key_id=UploadService.S3_KEY, aws_secret_access_key=UploadService.S3_SECRET)
 
-        s3.upload_fileobj(file, UploadService.S3_BUCKET, f"{suffix}.{extension}", ExtraArgs={ "ACL": "public-read", "ContentType": file.content_type, "CacheControl": "max-age=31536000" })
+        s3.upload_fileobj(file, UploadService.S3_BUCKET, f"{suffix}.{extension}", ExtraArgs={"ACL": "public-read", "ContentType": file.content_type, "CacheControl": "max-age=31536000"})
 
         return f"{UploadService.CDN}{suffix}.{extension}"
 
