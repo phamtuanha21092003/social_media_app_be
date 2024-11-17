@@ -112,3 +112,9 @@ class AccountUserService(BaseModelService):
         """
 
         return self.session.execute(text(query_str), {'user_id': user_id, 'keyword': f'%{keyword}%', 'limit': limit, 'offset': offset}).all(), total
+
+
+    def get_avatars(self, user_ids: List[int]):
+        users = self.find(id=user_ids)
+
+        return {user.id: user.avatar for user in users}

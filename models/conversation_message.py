@@ -1,12 +1,11 @@
 from .base import BaseModel, TimestampModel
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import ForeignKey
-import typing
+from .account_user import AccountUser
+from typing import Literal
 
 
-if typing.TYPE_CHECKING:
-    from .account_user import AccountUser
-
+Status = Literal['ACTIVE', 'DELETED']
 
 
 class ConversationMessage(BaseModel, TimestampModel):
@@ -21,3 +20,5 @@ class ConversationMessage(BaseModel, TimestampModel):
     conversation_id: Mapped[int] = mapped_column(ForeignKey("chat_conversation.id"), nullable=False, index=True)
 
     content: Mapped[str] = mapped_column(nullable=False)
+
+    status: Mapped[Status] = mapped_column(default='ACTIVE', index=True, nullable=False)
