@@ -22,3 +22,5 @@ class ConversationMessage(BaseModel, TimestampModel):
     content: Mapped[str] = mapped_column(nullable=False)
 
     status: Mapped[Status] = mapped_column(default='ACTIVE', index=True, nullable=False)
+
+    emoji_id: Mapped[int] = mapped_column(ForeignKey("emoji.id"), nullable=False, index=True)

@@ -14,6 +14,7 @@ class ConversationMessageService(BaseModelService):
             {
                 "id": message.id,
                 "content": message.content if message.status != "DELETED" else "The message has been deleted",
+                "emoji_id": message.emoji_id,
                 "creator_id": message.creator_id,
                 "status": message.status,
                 'created': message.created,
