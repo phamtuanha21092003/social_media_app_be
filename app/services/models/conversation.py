@@ -31,7 +31,7 @@ class ConversationService(BaseModelService):
                     ccm.status
                 FROM chat_conversation_message ccm
                 WHERE ccm.creator_id = :user_id or ccm.target_id = :user_id
-                ORDER BY ccm.conversation_id, ccm.created desc
+                ORDER BY ccm.conversation_id desc
                 LIMIT :limit
                 OFFSET :offset
             """
