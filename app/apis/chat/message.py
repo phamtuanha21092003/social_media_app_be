@@ -7,8 +7,9 @@ from app.services.models.conversation_message import ConversationMessageService
 from app.common.errors import UNotFound, UPermissionDenied
 from db import session_scope
 from app.services.validators import validate_params, get_limit_from_page, validate_body, PagingSchema
-from app.services.validators.chat.message import CreateMessageSchema
+from app.services.validators.chat.message import CreateMessageSchema, MessageEmojiSchema
 from app.utils import to_dict
+from app.services.models.emoji import EmojiService
 
 
 class Message(Resource):
@@ -115,4 +116,37 @@ class MessageDelete(Resource):
         with session_scope():
             self.conversation_message_service.update(message, status="DELETED")
 
+            return {"message": "success"}
+
+
+
+class MessageEmoji(Resource):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.account_user_service = AccountUserService()
+        self.conversation_message_service = ConversationMessageService()
+        self.emoji_service = EmojiService()
+
+
+    @jwt_required()
+    @validate_body(MessageEmojiSchema)
+    def put(self, message_id: int):
+        user_id = current_user.id
+
+        message = self.conversation_message_service.first(target_id=user_id, id=message_id)
+        if not message:
+            raise UNotFound(f'Message with id {message_id} not found')
+
+        emoji_id = self.body["emoji_id"]
+        emoji = self.emoji_service.find_by_id(emoji_id)
+        if not emoji:
+            raise UNotFound(f'Emoji with id {emoji_id} not found')
+
+        with session_scope():
+            if message.emoji_id == emoji_id:
+                self.conversation_message_service.update(message, emoji_id=None)
+                return {"message": "success"}
+
+            self.conversation_message_service.update(message, emoji_id=emoji_id)
             return {"message": "success"}
