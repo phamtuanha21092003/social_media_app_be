@@ -4,6 +4,7 @@ from app.services.models.comment import CommentService
 from app.services.models.post import PostService
 from app.services.models import AccountUserService
 from app.services.models.post_like import PostLikeService
+from app.services.models.post_save import PostSaveService
 from app.services.serializers.post import SerializerPost
 from app.services.validators import get_limit_from_page, validate_body, validate_params, PagingSchema
 from app.services.validators.feed import CreatePostRequestSchema, GetPostsRequestSchema
@@ -152,3 +153,53 @@ class PostLiked(Resource):
         posts = self.post_service.find(id=post_ids)
 
         return {'data': SerializerPost(many=True, exclude=["comments"]).dump_data(posts), 'total': total, 'message': 'success'}
+
+
+
+class PostSave(Resource):
+    def __init__(self) -> None:
+        self.post_service = PostService()
+        self.account_user_service = AccountUserService()
+        self.post_save_service = PostSaveService()
+
+
+    @jwt_required()
+    def post(self, post_id: int):
+        user_id = current_user.id
+
+        post = self.post_service.find_by_id(post_id)
+        if not post:
+            raise UNotFound("post id not found")
+
+        post_save = self.post_save_service.first(post_id=post_id, account_user_id=user_id)
+
+        with session_scope():
+            if not post_save:
+                self.post_save_service.create(account_user_id=user_id, post_id=post_id)
+                return {'message': "success", "is_saved": True}
+
+            self.post_save_service.delete(post_save)
+            return {'message': "success", "is_saved": False}
+
+
+
+class PostSaved(Resource):
+    def __init__(self) -> None:
+        self.post_service = PostService()
+        self.post_save_service = PostSaveService()
+
+
+    @jwt_required()
+    @validate_params(PagingSchema)
+    def get(self):
+        user_id = current_user.id
+
+        limit, offset = get_limit_from_page(self.params)
+
+        post_saves, total = self.post_save_service.find(account_user_id=user_id, order_bys=[self.post_save_service.model.created.desc()], limit=limit, offset=offset, is_get_total=True)
+        post_ids = [post.post_id for post in post_saves]
+
+        posts = self.post_service.find(id=post_ids)
+
+        return {'data': SerializerPost(many=True, exclude=["comments"]).dump_data(posts), 'total': total, 'message': 'success'}
+

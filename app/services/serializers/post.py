@@ -2,6 +2,7 @@ from marshmallow import fields
 from app.services.models.account_user import AccountUserService
 from app.services.models.comment import CommentService
 from app.services.models.post_like import PostLikeService
+from app.services.models.post_save import PostSaveService
 from .base import ModelSerializer, serializer_date_time
 from flask_jwt_extended import current_user
 
@@ -17,6 +18,8 @@ class SerializerPost(ModelSerializer):
 
         self.post_like_service = PostLikeService()
 
+        self.post_save_service = PostSaveService()
+
 
     title = fields.String()
     url = fields.String()
@@ -28,6 +31,7 @@ class SerializerPost(ModelSerializer):
     avatar = fields.Method("get_avatar")
     name = fields.Method("get_name")
     is_liked = fields.Method("get_is_liked")
+    is_saved = fields.Method("get_is_saved")
 
 
     def get_avatar(self, post):
@@ -70,6 +74,14 @@ class SerializerPost(ModelSerializer):
         return post_like is not None
 
 
+    def get_is_saved(self, post):
+        post_id = post.id
+
+        post_save = self.prefetch_data.get("post_saves", {}).get(post_id)
+
+        return post_save is not None
+
+
     def _add_prefetch_data(self, records):
         user_ids = set()
 
@@ -78,8 +90,10 @@ class SerializerPost(ModelSerializer):
         user_id = current_user.id
 
         post_likes = self.post_like_service.find(post_id=list(post_ids), account_user_id=user_id)
-
         self._add_prefetch_data_model(post_likes, 'post_id', 'post_likes')
+
+        post_saves = self.post_save_service.find(post_id=list(post_ids), account_user_id=user_id)
+        self._add_prefetch_data_model(post_saves, 'post_id', 'post_saves')
 
         if 'comments' in self.exclude or (self.only and 'comments' not in self.only):
             for _post in records:
