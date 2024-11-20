@@ -1,7 +1,9 @@
 from marshmallow import fields
 from app.services.models.account_user import AccountUserService
 from app.services.models.comment import CommentService
+from app.services.models.post_like import PostLikeService
 from .base import ModelSerializer, serializer_date_time
+from flask_jwt_extended import current_user
 
 
 
@@ -13,6 +15,8 @@ class SerializerPost(ModelSerializer):
 
         self.account_user_service = AccountUserService()
 
+        self.post_like_service = PostLikeService()
+
 
     title = fields.String()
     url = fields.String()
@@ -23,6 +27,7 @@ class SerializerPost(ModelSerializer):
     like_count = fields.Integer()
     avatar = fields.Method("get_avatar")
     name = fields.Method("get_name")
+    is_liked = fields.Method("get_is_liked")
 
 
     def get_avatar(self, post):
@@ -57,8 +62,24 @@ class SerializerPost(ModelSerializer):
         return result
 
 
+    def get_is_liked(self, post):
+        post_id = post.id
+
+        post_like = self.prefetch_data.get("post_likes", {}).get(post_id)
+
+        return post_like is not None
+
+
     def _add_prefetch_data(self, records):
         user_ids = set()
+
+        post_ids = {record.id for record in records}
+
+        user_id = current_user.id
+
+        post_likes = self.post_like_service.find(post_id=list(post_ids), account_user_id=user_id)
+
+        self._add_prefetch_data_model(post_likes, 'post_id', 'post_likes')
 
         if 'comments' in self.exclude or (self.only and 'comments' not in self.only):
             for _post in records:
@@ -70,10 +91,7 @@ class SerializerPost(ModelSerializer):
 
             return
 
-        post_ids = { record.id for record in records }
-
         comments = self.comment_service.find(post_id=list(post_ids), order_bys=[self.comment_service.model.created.desc()])
-
 
         for _post in records:
             user_ids.add(_post.account_user_id)

@@ -3,8 +3,9 @@ from flask_jwt_extended import jwt_required, current_user
 from app.services.models.comment import CommentService
 from app.services.models.post import PostService
 from app.services.models import AccountUserService
+from app.services.models.post_like import PostLikeService
 from app.services.serializers.post import SerializerPost
-from app.services.validators import get_limit_from_page, validate_body, validate_params
+from app.services.validators import get_limit_from_page, validate_body, validate_params, PagingSchema
 from app.services.validators.feed import CreatePostRequestSchema, GetPostsRequestSchema
 from app.services.validators.feed.post import CommentsRequestSchema
 from db import session_scope
@@ -100,3 +101,54 @@ class Comments(Resource):
                 self.comment_service.update(comment_reply, reply_count=comment_reply.reply_count + 1)
 
             return {'message': "Created successfully"}
+
+
+
+class PostLike(Resource):
+    def __init__(self) -> None:
+        self.post_service = PostService()
+        self.account_user_service = AccountUserService()
+        self.post_like_service = PostLikeService()
+
+
+    @jwt_required()
+    def post(self, post_id: int):
+        user_id = current_user.id
+
+        post = self.post_service.find_by_id(post_id)
+        if not post:
+            raise UNotFound("post id not found")
+
+        post_like = self.post_like_service.first(post_id=post_id, account_user_id=user_id)
+
+        with session_scope():
+            if not post_like:
+                self.post_like_service.create(account_user_id=user_id, post_id=post_id)
+                post = self.post_service.update(post, like_count=post.like_count + 1)
+                return {'message': "success", "is_liked": True, "like_count": post.like_count}
+
+            self.post_like_service.delete(post_like)
+            post = self.post_service.update(post, like_count=post.like_count - 1)
+            return {'message': "success", "is_liked": False, "like_count": post.like_count}
+
+
+
+class PostLiked(Resource):
+    def __init__(self) -> None:
+        self.post_service = PostService()
+        self.post_like_service = PostLikeService()
+
+
+    @jwt_required()
+    @validate_params(PagingSchema)
+    def get(self):
+        user_id = current_user.id
+
+        limit, offset = get_limit_from_page(self.params)
+
+        post_likes, total = self.post_like_service.find(account_user_id=user_id, order_bys=[self.post_like_service.model.created.desc()], limit=limit, offset=offset, is_get_total=True)
+        post_ids = [post.post_id for post in post_likes]
+
+        posts = self.post_service.find(id=post_ids)
+
+        return {'data': SerializerPost(many=True, exclude=["comments"]).dump_data(posts), 'total': total, 'message': 'success'}

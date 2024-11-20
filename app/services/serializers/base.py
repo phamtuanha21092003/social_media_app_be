@@ -27,7 +27,7 @@ class BaseSerializer(Schema):
         pass
 
 
-    def _add_prefetch_data_model(self, records, key_name, prefetch_key, many=False):   
+    def _add_prefetch_data_model(self, records, key_name, prefetch_key, many=False):
         self.prefetch_data[prefetch_key] = {}
         prefetched = self.prefetch_data[prefetch_key]
 
