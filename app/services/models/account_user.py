@@ -6,7 +6,8 @@ from models.account_friend import AccountFriend
 from models import AccountUser
 from app.common.errors import UPermissionDenied
 from .base import BaseModelService
-from sqlalchemy import Select, or_, and_
+from sqlalchemy import Select, or_
+import datetime
 
 
 class AccountUserService(BaseModelService):
@@ -34,6 +35,8 @@ class AccountUserService(BaseModelService):
         access_token = create_access_token(identity=user)
         refresh_token = create_refresh_token(identity=user)
         user_id = user.id
+
+        self.update(user, last_login=datetime.datetime.now(datetime.timezone.utc), is_active=True)
 
         return access_token, refresh_token, user_id
 
