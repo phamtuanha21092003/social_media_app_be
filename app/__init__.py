@@ -63,7 +63,7 @@ def __config_error_handlers(app: Flask):
     def rate_limit_error_handler(error):
         # TODO: Should change the error message format in future
         return (
-            json.dumps({'error': 'Too many request'}),
+            {'error': 'Too many request'},
             429,
         )
 
@@ -71,46 +71,46 @@ def __config_error_handlers(app: Flask):
     def validation_error_handler(error):
         # TODO: Should change the error message format in future
         return (
-            json.dumps({'error': 'Bad request', 'messages': error.messages}),
+            {'error': 'Bad request', 'messages': error.messages},
             400,
         )
 
     @app.errorhandler(500)
     def server_error_page(error):
-        return json.dumps({'error': 'Internal server error'}), 500
+        return {'error': 'Internal server error'}, 500
 
     @app.errorhandler(UForbidden)
     def forbidden(error):
-        return json.dumps({'error': str(error) or 'Forbidden'}), 403
+        return {'error': str(error) or 'Forbidden'}, 403
 
     @app.errorhandler(UConflict)
     def conflict(error):
-        return json.dumps({'error': str(error) or 'Conflict'}), 409
+        return {'error': str(error) or 'Conflict'}, 409
 
     @app.errorhandler(404)
     def page_not_found(error):
-        return json.dumps({'error': 'Resource not found'}), 404
+        return {'error': 'Resource not found'}, 404
 
     @app.errorhandler(UPermissionDenied)
     def permission_denied(error):
-        return json.dumps({'error': str(error)}), 401
+        return {'error': str(error)}, 401
 
     @app.errorhandler(UNotFound)
     def not_found(error):
         error_message = str(error) or 'Resource not found'
-        return json.dumps({'error': error_message}), 404
+        return {'error': error_message}, 404
 
     @app.errorhandler(UUnprocessableEntity)
     def unprocessable_entity(error):
         error_message = str(error) or 'Unprocessable Entity'
-        return json.dumps({'error': error_message}), 422
+        return {'error': error_message}, 422
 
     @app.errorhandler(UBadRequest)
     def bad_request(error):
         error_message = str(error) or 'Bad Request'
-        return json.dumps({'error': error_message}), 400
+        return {'error': error_message}, 400
 
     @app.errorhandler(IntegrityError)
     def integrity_error(error):
         error_message = str(error) or 'Integrity Error'
-        return json.dumps({'error': error_message}), 500
+        return {'error': error_message}, 500
