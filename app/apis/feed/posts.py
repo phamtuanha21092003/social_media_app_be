@@ -82,7 +82,7 @@ class Comments(Resource):
     def post(self, post_id: int):
         account_user_id = current_user.id
 
-        post = self.post_service.first(id=post_id, account_user_id=account_user_id)
+        post = self.post_service.first(id=post_id)
         if not post:
             raise UNotFound("post id not found")
 

@@ -56,6 +56,15 @@ class AccountUserService(BaseModelService):
         return total, friends
 
 
+    def count_friends(self, id: int) -> tuple[int, int]:
+        query = select(AccountUser, )\
+            .join(AccountFriend, or_(AccountFriend.target_id == AccountUser.id, AccountFriend.creator_id == AccountUser.id))\
+            .filter(or_(AccountFriend.creator_id == id, AccountFriend.target_id == id), AccountUser.id != id)
+
+        return self.get_total(query)
+
+
+
     # todo: fix this api use 1 raw query
     # this function get all user not is friend of this user
     # order by if have in account_user_people_you_may_know

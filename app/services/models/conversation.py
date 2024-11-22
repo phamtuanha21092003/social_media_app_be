@@ -20,20 +20,25 @@ class ConversationService(BaseModelService):
 
 
     def get_conversation_ids_and_total(self, user_id: int, limit: int, offset: int):
+        # todo: add limit offset to this function
         query = text(
             """
-                SELECT DISTINCT ON (ccm.conversation_id)
-                    ccm.conversation_id,
-                    ccm.content,
-                    ccm.created,
-                    CASE WHEN (ccm.creator_id = :user_id) THEN ccm.target_id ELSE ccm.creator_id END AS user_id,
-                    ccm.creator_id,
-                    ccm.status
-                FROM chat_conversation_message ccm
-                WHERE ccm.creator_id = :user_id or ccm.target_id = :user_id
-                ORDER BY ccm.conversation_id desc
-                LIMIT :limit
-                OFFSET :offset
+                SELECT c.id AS conversation_id,
+                       cm.content AS last_message,
+                       cm.created,
+                       CASE WHEN (cm.creator_id = :user_id) THEN cm.target_id ELSE cm.creator_id END AS user_id,
+                       cm.creator_id,
+                       cm.status
+                FROM chat_conversation c
+                JOIN chat_conversation_message cm
+                  ON c.id = cm.conversation_id
+                  AND cm.created = (
+                      SELECT MAX(created)
+                      FROM public.chat_conversation_message
+                      WHERE conversation_id = c.id
+                  )
+                WHERE cm.creator_id = :user_id OR cm.target_id = :user_id
+                ORDER BY cm.created DESC
             """
         )
 
