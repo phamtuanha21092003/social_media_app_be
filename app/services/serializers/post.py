@@ -62,6 +62,7 @@ class SerializerPost(ModelSerializer):
                 'name': users.get(_comment.account_user_id).name,
                 'user_account_id': _comment.account_user_id,
                 "reply_count": _comment.reply_count,
+                "post_id": _comment.post_id,
             })
 
         return result

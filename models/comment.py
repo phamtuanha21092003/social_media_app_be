@@ -19,7 +19,7 @@ class Comment(BaseModel, TimestampModel):
     account_user_id: Mapped[int] = mapped_column(ForeignKey("account_user.id"), nullable=False, index=True)
     account_user: Mapped["AccountUser"] = relationship(back_populates="comments")
 
-    post_id: Mapped[int] = mapped_column(ForeignKey("post.id"), nullable=True, index=True)
+    post_id: Mapped[int] = mapped_column(ForeignKey("post.id"), nullable=False, index=True)
     post: Mapped["Post"] = relationship(back_populates="comments")
 
     reply_id: Mapped[int] = mapped_column(ForeignKey("comment.id"))
