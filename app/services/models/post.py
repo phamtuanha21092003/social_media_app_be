@@ -9,7 +9,7 @@ class PostService(BaseModelService):
 
 
     def get_posts_by_keyword(self, keyword: str, limit: int, offset: int):
-        query = Select(self.model).where(self.model.title.ilike(f'%{keyword}%'))
+        query = Select(self.model).where(self.model.title.ilike(f'%{keyword}%'), self.model.status=="ACTIVE")
 
         total = self.get_total(query)
 

@@ -7,7 +7,7 @@ from app.services.models.post_like import PostLikeService
 from app.services.models.post_save import PostSaveService
 from app.services.serializers.post import SerializerPost
 from app.services.validators import get_limit_from_page, validate_body, validate_params, PagingSchema
-from app.services.validators.feed import CreatePostRequestSchema, GetPostsRequestSchema
+from app.services.validators.feed import CreatePostRequestSchema, GetPostsRequestSchema, UpadatePostRequestSchema
 from app.services.validators.feed.post import CommentsRequestSchema
 from db import session_scope
 from app.common.errors import UNotFound
@@ -35,11 +35,18 @@ class Posts(Resource):
         }
 
         if user_id:
-            user = self.account_user_service.find_by_id(user_id)
-            if not user:
-                raise UNotFound("User not found")
+            if user_id == current_user.id:
+                kwargs.update({'account_user_id': user_id, 'status': ['ACTIVE', 'PRIVATE']})
 
-            kwargs.update({'account_user_id': user_id})
+            else:
+                user = self.account_user_service.find_by_id(user_id)
+                if not user:
+                    raise UNotFound("User not found")
+
+                kwargs.update({'account_user_id': user_id, 'status': 'ACTIVE'})
+
+        else:
+            kwargs.update({'status': 'ACTIVE'})
 
         posts, total = self.post_service.find(**kwargs)
 
@@ -50,7 +57,15 @@ class Posts(Resource):
     @validate_body(CreatePostRequestSchema)
     def post(self):
         with session_scope():
-            post = self.post_service.create(account_user_id=current_user.id, **self.body)
+            kwargs = {
+                'title': self.body.get("title"),
+                'url': self.body.get("url"),
+            }
+
+            if self.body.get("is_private"):
+                kwargs.update({"status": "PRIVATE"})
+
+            post = self.post_service.create(account_user_id=current_user.id, **kwargs)
 
             return {'message': 'Created successfully', 'data': SerializerPost(exclude=["comments"]).dump_data(post)}
 
@@ -68,6 +83,33 @@ class Post(Resource):
             raise UNotFound("post id not found")
 
         return {'data': SerializerPost().dump_data(post)}
+
+
+    @jwt_required()
+    @validate_body(UpadatePostRequestSchema)
+    def put(self, id: int):
+        user_id = current_user.id
+
+        post = self.post_service.find_by_id(id)
+
+        if post.account_user_id != user_id:
+            raise UNotFound("post id not found")
+
+        data = {}
+
+        if self.body.get("title"):
+            data["title"] = self.body['title']
+
+        if self.body.get("url"):
+            data["url"] = self.body['url']
+
+        if self.body.get("status"):
+            data["status"] = self.body['status']
+
+        with session_scope():
+            self.post_service.update(post, **data)
+
+            return {"message": "success", "status": post.status}
 
 
 

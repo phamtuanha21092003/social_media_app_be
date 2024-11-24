@@ -32,6 +32,7 @@ class SerializerPost(ModelSerializer):
     name = fields.Method("get_name")
     is_liked = fields.Method("get_is_liked")
     is_saved = fields.Method("get_is_saved")
+    status = fields.String()
 
 
     def get_avatar(self, post):
