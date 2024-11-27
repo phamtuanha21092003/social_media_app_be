@@ -33,6 +33,7 @@ class SerializerPost(ModelSerializer):
     is_liked = fields.Method("get_is_liked")
     is_saved = fields.Method("get_is_saved")
     status = fields.String()
+    key_comments = fields.List(fields.Integer(allow_none=True))
 
 
     def get_avatar(self, post):
@@ -50,9 +51,11 @@ class SerializerPost(ModelSerializer):
 
         result = {}
 
+        post.key_comments = []
         for _comment in comments:
             if not result.get(_comment.reply_id):
                 result[_comment.reply_id] = []
+                post.key_comments.append(_comment.reply_id)
 
             result[_comment.reply_id].append({
                 'id': _comment.id,
@@ -60,10 +63,11 @@ class SerializerPost(ModelSerializer):
                 'created': serializer_date_time(_comment.created),
                 'avatar': users.get(_comment.account_user_id).avatar,
                 'name': users.get(_comment.account_user_id).name,
-                'user_account_id': _comment.account_user_id,
+                'account_user_id': _comment.account_user_id,
                 "reply_count": _comment.reply_count,
                 "post_id": _comment.post_id,
             })
+
 
         return result
 

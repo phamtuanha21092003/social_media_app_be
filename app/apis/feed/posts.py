@@ -8,7 +8,8 @@ from app.services.models.post_save import PostSaveService
 from app.services.serializers.post import SerializerPost
 from app.services.validators import get_limit_from_page, validate_body, validate_params, PagingSchema
 from app.services.validators.feed import CreatePostRequestSchema, GetPostsRequestSchema, UpadatePostRequestSchema
-from app.services.validators.feed.post import CommentsRequestSchema
+from app.services.validators.feed.post import CommentsPostRequestSchema, CommentsPutRequestSchema, \
+    CommentsDeleteRequestSchema
 from db import session_scope
 from app.common.errors import UNotFound
 
@@ -120,7 +121,7 @@ class Comments(Resource):
 
 
     @jwt_required()
-    @validate_body(CommentsRequestSchema)
+    @validate_body(CommentsPostRequestSchema)
     def post(self, post_id: int):
         account_user_id = current_user.id
 
@@ -143,8 +144,50 @@ class Comments(Resource):
             if comment_reply:
                 self.comment_service.update(comment_reply, reply_count=comment_reply.reply_count + 1)
 
-            return {'message': "Created successfully"}
+            return {'message': "success"}
 
+
+    @jwt_required()
+    @validate_body(CommentsPutRequestSchema)
+    def put(self, post_id: int):
+        comment_id = self.body["id"]
+
+        user_id = current_user.id
+
+        comment = self.comment_service.first(id=comment_id, post_id=post_id, account_user_id=user_id)
+        if not comment:
+            raise UNotFound("comment id not found")
+
+        with session_scope():
+            self.comment_service.update(comment, title=self.body["title"])
+
+            return {'message': "success"}
+
+
+    @jwt_required()
+    @validate_body(CommentsDeleteRequestSchema)
+    def delete(self, post_id: int):
+        comment_id = self.body["id"]
+
+        user_id = current_user.id
+
+        post = self.post_service.first(id=post_id)
+        if not post:
+            raise UNotFound("post id not found")
+
+        comment = self.comment_service.first(id=comment_id, post_id=post_id, account_user_id=user_id)
+        if not comment:
+            raise UNotFound("comment id not found")
+
+        with session_scope():
+            reply_id = comment.reply_id
+            if reply_id:
+                comment_reply = self.comment_service.find_by_id(reply_id)
+                self.comment_service.update(comment_reply, reply_count=comment_reply.reply_count - 1)
+
+            self.comment_service.delete_comment_by_id(comment.id)
+            self.post_service.update(post, comment_count=self.comment_service.get_count_comment_of_post(post_id))
+            return {'message': "success"}
 
 
 class PostLike(Resource):

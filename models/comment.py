@@ -22,6 +22,6 @@ class Comment(BaseModel, TimestampModel):
     post_id: Mapped[int] = mapped_column(ForeignKey("post.id"), nullable=False, index=True)
     post: Mapped["Post"] = relationship(back_populates="comments")
 
-    reply_id: Mapped[int] = mapped_column(ForeignKey("comment.id"))
+    reply_id: Mapped[int] = mapped_column(ForeignKey("comment.id", ondelete='CASCADE'))
     replies:  Mapped[typing.List["Comment"]] = relationship("Comment", back_populates="reply", lazy="dynamic")
     reply: Mapped["Comment"] = relationship("Comment", back_populates="replies", remote_side="[Comment.id]")
