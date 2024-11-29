@@ -5,11 +5,13 @@ from app.services.models.post import PostService
 from app.services.models import AccountUserService
 from app.services.models.post_like import PostLikeService
 from app.services.models.post_save import PostSaveService
+from app.services.models.emoji import EmojiService
+from app.services.models.comment_emoji_user import CommentEmojiUserService
 from app.services.serializers.post import SerializerPost
 from app.services.validators import get_limit_from_page, validate_body, validate_params, PagingSchema
 from app.services.validators.feed import CreatePostRequestSchema, GetPostsRequestSchema, UpadatePostRequestSchema
 from app.services.validators.feed.post import CommentsPostRequestSchema, CommentsPutRequestSchema, \
-    CommentsDeleteRequestSchema
+    CommentsDeleteRequestSchema, UpdateEmojiRequestSchema, DeleteEmojiRequestSchema
 from db import session_scope
 from app.common.errors import UNotFound
 
@@ -288,3 +290,59 @@ class PostSaved(Resource):
 
         return {'data': SerializerPost(many=True, exclude=["comments"]).dump_data(posts), 'total': total, 'message': 'success'}
 
+
+
+class CommentEmoji(Resource):
+    def __init__(self) -> None:
+        self.account_user_service = AccountUserService()
+        self.post_service = PostService()
+        self.comment_service = CommentService()
+        self.emoji_service = EmojiService()
+        self.comment_emoji_user_service = CommentEmojiUserService()
+
+
+    @jwt_required()
+    @validate_body(UpdateEmojiRequestSchema)
+    def put(self, comment_id: int):
+        user_id = current_user.id
+
+        post_id = self.body["post_id"]
+
+        comment = self.comment_service.first(id=comment_id, post_id=post_id)
+        if not comment or comment.account_user_id == user_id:
+            raise UNotFound("comment id not found")
+
+        emoji_id = self.body["emoji_id"]
+        emoji = self.emoji_service.find_by_id(emoji_id)
+        if not emoji:
+            raise UNotFound("emoji id not found")
+
+        comment_emoji_user = self.comment_emoji_user_service.first(account_user_id=user_id, comment_id=comment_id)
+        with session_scope():
+            if not comment_emoji_user:
+                self.comment_emoji_user_service.create(comment_id=comment_id, account_user_id=user_id, emoji_id=emoji_id)
+                return {'message': "success"}
+
+            self.comment_emoji_user_service.update(comment_emoji_user, emoji_id=emoji_id)
+            return {'message': "success"}
+
+
+    @jwt_required()
+    @validate_body(DeleteEmojiRequestSchema)
+    def delete(self, comment_id: int):
+        user_id = current_user.id
+
+        post_id = self.body["post_id"]
+
+        comment = self.comment_service.first(id=comment_id, post_id=post_id)
+        if not comment:
+            raise UNotFound("comment id not found")
+
+        comment_emoji_user = self.comment_emoji_user_service.first(account_user_id=user_id, comment_id=comment_id)
+        if not comment_emoji_user:
+            raise UNotFound("emoji id not found")
+
+        with session_scope():
+            self.comment_emoji_user_service.delete(comment_emoji_user)
+
+            return {'message': "success"}

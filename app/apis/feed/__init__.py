@@ -1,6 +1,6 @@
 from flask import Blueprint
 from flask_restful import Api
-from .posts import Posts, Post, Comments, PostLike, PostLiked, PostSave, PostSaved
+from .posts import Posts, Post, Comments, PostLike, PostLiked, PostSave, PostSaved, CommentEmoji
 
 feed_blueprint = Blueprint("feed_blueprint", __name__, url_prefix="/feed")
 feed_api = Api(feed_blueprint)
@@ -13,7 +13,8 @@ feed_resources = {
     "/posts/like/<int:post_id>": PostLike,
     "/posts/liked": PostLiked,
     "/posts/save/<int:post_id>": PostSave,
-    "/posts/saved": PostSaved
+    "/posts/saved": PostSaved,
+    "/comments/emoji/<int:comment_id>": CommentEmoji,
 }
 
 

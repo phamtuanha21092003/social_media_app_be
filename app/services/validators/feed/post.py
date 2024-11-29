@@ -16,3 +16,15 @@ class CommentsPutRequestSchema(BaseSchema):
 
 class CommentsDeleteRequestSchema(BaseSchema):
     id = fields.Integer(required=True)
+
+
+
+class UpdateEmojiRequestSchema(BaseSchema):
+    post_id = fields.Integer(required=True)
+    emoji_id = fields.Integer(required=True, validate=validate.OneOf({21, 31, 32, 33, 34}))
+
+
+
+class DeleteEmojiRequestSchema(BaseSchema):
+    post_id = fields.Integer(required=True)
+
