@@ -1,12 +1,11 @@
 from typing import List
-from sqlalchemy import or_, select, text
+from sqlalchemy import or_, select, text, Select
 from flask_bcrypt import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token, create_refresh_token
 from models.account_friend import AccountFriend
 from models import AccountUser
 from app.common.errors import UPermissionDenied
 from .base import BaseModelService
-from sqlalchemy import Select, or_
 import datetime
 
 

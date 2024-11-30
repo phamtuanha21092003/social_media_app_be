@@ -4,6 +4,7 @@ from .login import Login
 from .sign_up import SignUp
 from .refresh import Refresh
 from .logout import Logout
+from .password import ChangePassword
 
 
 auth_blueprint = Blueprint("auth_blueprint", __name__, url_prefix="/auth")
@@ -15,6 +16,7 @@ auth_routers = {
     "/sign_up": SignUp,
     "/refresh": Refresh,
     '/logout': Logout,
+    "/change_password": ChangePassword,
 }
 
 
